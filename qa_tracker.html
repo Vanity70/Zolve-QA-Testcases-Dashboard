@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Test Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ── Reset & Variables ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --beige:        #F4EFE6;
+  --beige-soft:   #FAF7F2;
+  --beige-dark:   #E8E0D2;
+  --beige-mid:    #D4C9B5;
+  --beige-deep:   #C4B89A;
+  --black:        #18181A;
+  --black-soft:   #252527;
+  --black-mid:    #363638;
+  --black-light:  #4A4A4C;
+  --white:        #FDFCFA;
+  --off-white:    #F8F5EF;
+  --border:       #C8BFA8;
+  --border-light: #DDD5C4;
+  --muted:        #8A8070;
+  --muted-light:  #B0A898;
+
+  --pass-text:    #2D6A12;
+  --pass-bg:      #E8F3DC;
+  --pass-border:  #B8D98C;
+  --fail-text:    #9E2424;
+  --fail-bg:      #FAE8E8;
+  --fail-border:  #EFB4B4;
+  --pend-text:    #7A4A0A;
+  --pend-bg:      #FAF0DC;
+  --pend-border:  #E8C878;
+  --block-text:   #1A5090;
+  --block-bg:     #E4EEF8;
+  --block-border: #A8C4E8;
+
+  --shadow-sm:    0 1px 3px rgba(24,24,26,0.08), 0 1px 2px rgba(24,24,26,0.05);
+  --shadow-md:    0 4px 12px rgba(24,24,26,0.10), 0 2px 4px rgba(24,24,26,0.06);
+  --shadow-lg:    0 12px 32px rgba(24,24,26,0.14), 0 4px 8px rgba(24,24,26,0.08);
+  --shadow-xl:    0 24px 48px rgba(24,24,26,0.18), 0 8px 16px rgba(24,24,26,0.10);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Instrument Sans', sans-serif;
+  background: var(--beige-soft);
+  color: var(--black);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--beige-dark); }
+::-webkit-scrollbar-thumb { background: var(--beige-mid); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.app { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.header {
+  background: var(--black);
+  padding: 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--black-mid);
+}
+
+.header-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--white);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.header-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 400;
+  color: #565658;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.header-actions { display: flex; gap: 10px; align-items: center; }
+
+.btn {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 16px;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--white);
+  color: var(--black);
+}
+.btn-primary:hover { background: var(--beige); }
+
+.btn-ghost {
+  background: transparent;
+  color: #6A6A6C;
+  border: 1px solid var(--black-mid);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.btn-ghost:hover { color: var(--beige); border-color: #6A6A6C; }
+
+.sync-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  letter-spacing: 0.5px;
+  border: 1px solid;
+  animation: fadeIn 0.2s ease;
+}
+.sync-badge.syncing { background: var(--black-soft); color: #8A8A8C; border-color: var(--black-mid); }
+.sync-badge.ok      { background: var(--pass-bg); color: var(--pass-text); border-color: var(--pass-border); }
+.sync-badge.err     { background: var(--fail-bg); color: var(--fail-text); border-color: var(--fail-border); }
+
+/* ── Version Rail ────────────────────────────────────────────────────────── */
+.version-rail {
+  background: var(--black-soft);
+  border-bottom: 1px solid var(--black-mid);
+  display: flex;
+  overflow-x: auto;
+  padding: 0 36px;
+  gap: 0;
+  scrollbar-width: none;
+}
+.version-rail::-webkit-scrollbar { display: none; }
+
+.version-tab {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px 22px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  border-right: 1px solid var(--black-mid);
+  min-width: 0;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  position: relative;
+}
+.version-tab:hover { background: rgba(255,255,255,0.03); }
+.version-tab.active {
+  background: rgba(255,255,255,0.05);
+  border-bottom-color: var(--beige-mid);
+}
+
+.version-tab-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.version-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: #5A5A5C;
+  letter-spacing: 0.5px;
+  transition: color 0.15s;
+}
+.version-tab.active .version-label { color: var(--beige); }
+
+.version-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.version-badge.base  { background: var(--black-mid); color: #8A8A8C; }
+.version-badge.pct   { background: var(--black-mid); color: #8A8A8C; }
+.version-badge.pct.good { background: var(--pass-bg); color: var(--pass-text); }
+
+.version-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: #484848;
+  margin-top: 2px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.version-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  font-size: 18px;
+  color: #484848;
+  cursor: pointer;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.version-add:hover { color: var(--beige); }
+
+/* ── Module Sub-tabs ─────────────────────────────────────────────────────── */
+.module-bar {
+  background: var(--beige-dark);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  overflow-x: auto;
+  padding: 0 36px;
+  scrollbar-width: none;
+}
+.module-bar::-webkit-scrollbar { display: none; }
+
+.module-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  border-right: 1px solid var(--border-light);
+  white-space: nowrap;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.module-tab:hover { color: var(--black); }
+.module-tab.active {
+  color: var(--black);
+  border-bottom-color: var(--black);
+}
+
+.module-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 20px;
+  background: var(--beige-mid);
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.module-tab.active .module-count {
+  background: var(--black);
+  color: var(--beige);
+}
+
+/* ── Main Content ────────────────────────────────────────────────────────── */
+.content { flex: 1; padding: 28px 36px; }
+
+/* ── Version Header ──────────────────────────────────────────────────────── */
+.version-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  gap: 20px;
+}
+
+.version-title-group { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+
+.version-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--black);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.version-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.version-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.meta-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  background: var(--beige-dark);
+  color: var(--muted);
+}
+
+/* ── V0 Banner ───────────────────────────────────────────────────────────── */
+.v0-banner {
+  background: var(--beige-dark);
+  border: 1px solid var(--border);
+  padding: 14px 20px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.v0-banner-text {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.v0-banner-text strong { color: var(--black); }
+
+/* ── Stats Grid ──────────────────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.stat-card:hover { box-shadow: var(--shadow-sm); }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.stat-card.total::before  { background: var(--black); }
+.stat-card.pass::before   { background: var(--pass-text); }
+.stat-card.fail::before   { background: var(--fail-text); }
+.stat-card.other::before  { background: var(--pend-text); }
+
+.stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted-light);
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 38px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.stat-card.total .stat-value  { color: var(--black); }
+.stat-card.pass  .stat-value  { color: var(--pass-text); }
+.stat-card.fail  .stat-value  { color: var(--fail-text); }
+.stat-card.other .stat-value  { color: var(--pend-text); }
+
+.stat-sub {
+  font-size: 10px;
+  color: var(--muted-light);
+  margin-top: 4px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── Progress Bar ────────────────────────────────────────────────────────── */
+.progress-wrap {
+  margin-bottom: 24px;
+}
+
+.progress-bar {
+  height: 5px;
+  background: var(--beige-dark);
+  border: 1px solid var(--border);
+  display: flex;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.pb-pass    { background: var(--pass-text);  transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+.pb-fail    { background: var(--fail-text);  transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+.pb-pending { background: #C8941A;           transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+.pb-blocked { background: var(--block-text); transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+.progress-legend {
+  display: flex;
+  gap: 18px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Table Card ──────────────────────────────────────────────────────────── */
+.table-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.table-card-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--beige-dark);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.table-card-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+}
+
+.status-pills { display: flex; gap: 8px; }
+
+.status-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border: 1px solid;
+}
+.status-pill.pass    { background: var(--pass-bg);  color: var(--pass-text);  border-color: var(--pass-border);  }
+.status-pill.fail    { background: var(--fail-bg);  color: var(--fail-text);  border-color: var(--fail-border);  }
+.status-pill.pending { background: var(--pend-bg);  color: var(--pend-text);  border-color: var(--pend-border);  }
+.status-pill.blocked { background: var(--block-bg); color: var(--block-text); border-color: var(--block-border); }
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.table-scroll { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted-light);
+  background: var(--beige-dark);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--beige-dark);
+  transition: background 0.1s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--beige-soft); }
+tbody tr:nth-child(even) { background: #FDFAF6; }
+tbody tr:nth-child(even):hover { background: var(--beige-soft); }
+
+td { padding: 10px 14px; vertical-align: top; }
+
+.tc-id {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.type-badge.positive { background: var(--pass-bg); color: var(--pass-text); border-color: var(--pass-border); }
+.type-badge.negative { background: var(--fail-bg); color: var(--fail-text); border-color: var(--fail-border); }
+
+.submodule-text { font-size: 11px; color: var(--black); white-space: nowrap; }
+
+.priority-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 11px;
+}
+.priority-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-high   { background: #D4820A; }
+.dot-medium { background: #8A8888; }
+.dot-low    { background: #90B8DC; }
+
+.cell-text {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 220px;
+  white-space: pre-line;
+}
+
+.status-select {
+  appearance: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border: 1px solid;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%238A8070'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+  transition: all 0.15s;
+}
+.status-select.pending { background-color: var(--pend-bg);  color: var(--pend-text);  border-color: var(--pend-border);  }
+.status-select.pass    { background-color: var(--pass-bg);  color: var(--pass-text);  border-color: var(--pass-border);  }
+.status-select.fail    { background-color: var(--fail-bg);  color: var(--fail-text);  border-color: var(--fail-border);  }
+.status-select.blocked { background-color: var(--block-bg); color: var(--block-text); border-color: var(--block-border); }
+
+.actual-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-light);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  width: 150px;
+  padding: 3px 0;
+  transition: border-color 0.15s;
+}
+.actual-input:focus {
+  outline: none;
+  border-bottom-color: var(--black);
+}
+.actual-input::placeholder { color: var(--muted-light); }
+
+/* ── Empty State ─────────────────────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 40px;
+  text-align: center;
+}
+.empty-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--black-light);
+  margin-bottom: 10px;
+}
+.empty-sub { font-size: 13px; color: var(--muted); }
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(24,24,26,0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.15s ease;
+}
+.modal-overlay.hidden { display: none; }
+
+.modal {
+  background: var(--white);
+  border: 1px solid var(--border);
+  width: 520px;
+  max-width: 94vw;
+  box-shadow: var(--shadow-xl);
+  animation: slideUp 0.2s ease;
+}
+
+.modal-head {
+  background: var(--black);
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal-head-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px;
+  font-weight: 400;
+  color: var(--white);
+  letter-spacing: 0.01em;
+}
+.modal-head-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: #5A5A5C;
+  margin-left: 12px;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: #6A6A6C;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px;
+  transition: color 0.15s;
+}
+.modal-close:hover { color: var(--beige); }
+
+.modal-body { padding: 24px; }
+
+.modal-info {
+  background: var(--beige-dark);
+  border: 1px solid var(--border-light);
+  padding: 12px 16px;
+  margin-bottom: 22px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.modal-info strong { color: var(--black); }
+
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.form-input {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  background: var(--beige-soft);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 13px;
+  color: var(--black);
+  transition: border-color 0.15s, background 0.15s;
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--black);
+  background: var(--white);
+}
+
+.form-code {
+  background: var(--black-soft);
+  color: #C8C0A8;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 14px 16px;
+  border: 1px solid var(--black-mid);
+  line-height: 1.8;
+  white-space: pre;
+  overflow-x: auto;
+  margin-top: 8px;
+  border-radius: 2px;
+}
+
+.form-help {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+.modal-foot {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: var(--beige-soft);
+}
+
+.btn-cancel {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-cancel:hover { color: var(--black); border-color: var(--black); }
+
+.btn-confirm {
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 22px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-confirm:hover { background: var(--black-soft); }
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .header { padding: 0 18px; }
+  .version-rail, .module-bar, .content { padding-left: 18px; padding-right: 18px; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); }
+  .header-eyebrow { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-brand">
+      <span class="header-title">QA Test Tracker</span>
+      <span class="header-eyebrow">Version History</span>
+    </div>
+    <div class="header-actions">
+      <span id="syncBadge" class="sync-badge" style="display:none"></span>
+      <button class="btn btn-ghost" onclick="openSyncModal()">↻ Sync from Sheet</button>
+      <button class="btn btn-primary" onclick="openNewRunModal()">+ New Run</button>
+    </div>
+  </header>
+
+  <!-- Version Rail -->
+  <div class="version-rail" id="versionRail"></div>
+
+  <!-- Module Sub-tabs -->
+  <div class="module-bar" id="moduleBar"></div>
+
+  <!-- Content -->
+  <main class="content" id="mainContent"></main>
+
+</div>
+
+<!-- New Run Modal -->
+<div class="modal-overlay hidden" id="newRunModal" onclick="if(event.target===this)closeModal('newRunModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <div style="display:flex;align-items:baseline;gap:0">
+        <span class="modal-head-title">New Test Run</span>
+        <span class="modal-head-sub" id="newRunVersionLabel"></span>
+      </div>
+      <button class="modal-close" onclick="closeModal('newRunModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-info">
+        Inherits all <strong id="caseCount">42</strong> test cases from <strong>V0</strong>. All statuses start as <code style="font-family:'DM Mono',monospace;font-size:11px">Pending</code>.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Run Name</label>
+        <input class="form-input" id="inputRunName" placeholder="e.g. Sprint 3 Regression" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date Executed</label>
+        <input class="form-input" type="date" id="inputRunDate" />
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal('newRunModal')">Cancel</button>
+      <button class="btn-confirm" id="createRunBtn" onclick="createRun()">Create V1</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sync Modal -->
+<div class="modal-overlay hidden" id="syncModal" onclick="if(event.target===this)closeModal('syncModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-head-title">Sync V0 from Google Sheet</span>
+      <button class="modal-close" onclick="closeModal('syncModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-info">
+        V0 is the canonical test case library. Syncing replaces V0 cases with the live data from your Google Sheet. Existing V1, V2, … runs are never affected.
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Step 1 — Set up Apps Script</label>
+        <div class="form-help">In your Google Sheet → <strong>Extensions → Apps Script</strong>. Paste the function below, then <strong>Deploy → New deployment → Web App → Anyone</strong>.</div>
+        <div class="form-code">function doGet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const allData = {};
+  ss.getSheets().forEach(sheet => {
+    const name = sheet.getName();
+    const rows = sheet.getDataRange().getValues();
+    if (rows.length < 2) return;
+    const headers = rows[0];
+    allData[name] = rows.slice(1).map(r => {
+      const obj = {};
+      headers.forEach((h, i) => { if(h) obj[h] = r[i] ?? ''; });
+      return obj;
+    }).filter(r => r['TC ID'] || r['id']);
+  });
+  return ContentService
+    .createTextOutput(JSON.stringify(allData))
+    .setMimeType(ContentService.MimeType.JSON);
+}</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Step 2 — Paste your Web App URL</label>
+        <input class="form-input" id="inputSheetUrl" placeholder="https://script.google.com/macros/s/…/exec" />
+        <div class="form-help">The URL ends in <code style="font-family:'DM Mono',monospace">/exec</code>. Make sure access is set to <strong>Anyone</strong>.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal('syncModal')">Cancel</button>
+      <button class="btn-confirm" onclick="saveAndSync()">Save & Sync Now</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Data ─────────────────────────────────────────────────────────────────────
+
+const V0_DEFAULT = [
+  {id:'TC_LGN_001',type:'Positive',module:'Login',subModule:'Email & Password',priority:'High',preConditions:'App running; valid account: user@test.com / Test@123',steps:'1. Open login page\n2. Enter valid email: user@test.com\n3. Enter valid password: Test@123\n4. Click Login',expected:'OTP screen is displayed; OTP sent to registered phone'},
+  {id:'TC_LGN_003',type:'Negative',module:'Login',subModule:'Email & Password',priority:'High',preConditions:'App running; valid account exists',steps:'1. Enter valid email: user@test.com\n2. Enter wrong password: Wrong@999\n3. Click Login',expected:"Error: 'Invalid email or password' displayed; user stays on login page"},
+  {id:'TC_LGN_004',type:'Negative',module:'Login',subModule:'Email & Password',priority:'High',preConditions:'App running',steps:'1. Leave email and password fields blank\n2. Click Login',expected:"Validation errors: 'Email is required' and 'Password is required'"},
+  {id:'TC_LGN_005',type:'Negative',module:'Login',subModule:'Email & Password',priority:'Medium',preConditions:'App running',steps:'1. Enter invalid email: usertest.com\n2. Enter any password\n3. Click Login',expected:"Validation error: 'Please enter a valid email address'"},
+  {id:'TC_LGN_006',type:'Negative',module:'Login',subModule:'Email & Password',priority:'Medium',preConditions:'App running',steps:'1. Enter non-existent email: ghost@test.com\n2. Enter any password\n3. Click Login',expected:"Error: 'Invalid email or password' displayed (no account hint)"},
+  {id:'TC_LGN_011',type:'Negative',module:'Login',subModule:'Email & Password',priority:'High',preConditions:'App running; account with failed attempts history',steps:'1. Enter valid email\n2. Enter wrong password 5 consecutive times\n3. Click Login each time',expected:"Account locked after 5 failed attempts; error: 'Account locked. Try again later or reset password'"},
+  {id:'TC_LGN_002',type:'Positive',module:'Login',subModule:'Email & Password – OTP',priority:'High',preConditions:'OTP screen displayed after valid email/password login',steps:'1. Enter valid 6-digit OTP received on phone\n2. Click Verify',expected:'User is successfully logged in and redirected to Dashboard'},
+  {id:'TC_LGN_007',type:'Negative',module:'Login',subModule:'Email & Password – OTP',priority:'High',preConditions:'OTP screen displayed after valid email/password login',steps:'1. Enter incorrect OTP: 000000\n2. Click Verify',expected:"Error: 'Incorrect OTP. Please try again'"},
+  {id:'TC_LGN_008',type:'Negative',module:'Login',subModule:'Email & Password – OTP',priority:'High',preConditions:'OTP screen displayed; OTP sent to phone',steps:'1. Wait for OTP to expire (5 mins)\n2. Enter the expired OTP\n3. Click Verify',expected:"Error: 'OTP has expired. Please request a new one'"},
+  {id:'TC_LGN_009',type:'Negative',module:'Login',subModule:'Email & Password – OTP',priority:'Medium',preConditions:'OTP screen displayed',steps:'1. Leave OTP field blank\n2. Click Verify',expected:"Validation error: 'Please enter the OTP'"},
+  {id:'TC_LGN_010',type:'Positive',module:'Login',subModule:'Email & Password – OTP',priority:'Medium',preConditions:'OTP screen displayed; OTP received',steps:'1. Click Resend OTP\n2. Enter newly received OTP\n3. Click Verify',expected:'New OTP is sent; user successfully verified and logged in'},
+  {id:'TC_LGN_012',type:'Positive',module:'Login',subModule:'Google Login',priority:'High',preConditions:'App running; valid Google account linked',steps:'1. Click Sign in with Google\n2. Select valid Google account\n3. Authorize on Google consent screen',expected:'MFA screen displayed after successful Google authentication'},
+  {id:'TC_LGN_013',type:'Negative',module:'Login',subModule:'Google Login',priority:'Medium',preConditions:'App running; Google OAuth configured',steps:'1. Click Sign in with Google\n2. Click Cancel / close Google popup',expected:'User returned to login page; no error; login not completed'},
+  {id:'TC_LGN_014',type:'Negative',module:'Login',subModule:'Google Login',priority:'Medium',preConditions:'App running',steps:'1. Click Sign in with Google\n2. Enter unregistered Google account',expected:"Error: 'No account found linked to this Google account. Please sign up'"},
+  {id:'TC_LGN_015',type:'Positive',module:'Login',subModule:'Apple Login',priority:'High',preConditions:'App running; valid Apple ID linked to account',steps:'1. Click Sign in with Apple\n2. Authenticate with valid Apple ID / Face ID / Touch ID',expected:'MFA screen displayed after successful Apple authentication'},
+  {id:'TC_LGN_016',type:'Negative',module:'Login',subModule:'Apple Login',priority:'Medium',preConditions:'App running; Apple Sign-In configured',steps:'1. Click Sign in with Apple\n2. Cancel / dismiss Apple authentication',expected:'User returned to login page; login not completed'},
+  {id:'TC_LGN_017',type:'Negative',module:'Login',subModule:'Apple Login',priority:'Medium',preConditions:'App running',steps:'1. Click Sign in with Apple\n2. Use Apple ID not registered in the app',expected:"Error: 'No account found linked to this Apple ID. Please sign up'"},
+  {id:'TC_LGN_018',type:'Positive',module:'Social Auth',subModule:'First 4 Digits of Phone',priority:'High',preConditions:'MFA screen displayed after Google/Apple login; registered phone: 9876543210',steps:'1. MFA prompts for first 4 digits of phone\n2. Enter: 9876\n3. Click Verify',expected:'MFA passed; user redirected to Dashboard'},
+  {id:'TC_LGN_019',type:'Negative',module:'Social Auth',subModule:'First 4 Digits of Phone',priority:'High',preConditions:'MFA screen displayed; registered phone: 9876543210',steps:'1. MFA prompts for first 4 digits\n2. Enter incorrect digits: 1234\n3. Click Verify',expected:"Error: 'Incorrect details. Please try again'"},
+  {id:'TC_LGN_020',type:'Negative',module:'Social Auth',subModule:'First 4 Digits of Phone',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for first 4 digits\n2. Enter only 3 digits: 987\n3. Click Verify',expected:"Validation: 'Please enter exactly 4 digits'"},
+  {id:'TC_LGN_021',type:'Negative',module:'Social Auth',subModule:'First 4 Digits of Phone',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for first 4 digits\n2. Enter alphabets: ABCD\n3. Click Verify',expected:'Validation: field only accepts numeric input; alphabets are blocked'},
+  {id:'TC_LGN_022',type:'Positive',module:'Social Auth',subModule:'Last 4 Digits of Phone',priority:'High',preConditions:'MFA screen displayed; registered phone: 9876543210',steps:'1. MFA prompts for last 4 digits of phone\n2. Enter: 3210\n3. Click Verify',expected:'MFA passed; user redirected to Dashboard'},
+  {id:'TC_LGN_023',type:'Negative',module:'Social Auth',subModule:'Last 4 Digits of Phone',priority:'High',preConditions:'MFA screen displayed; registered phone: 9876543210',steps:'1. MFA prompts for last 4 digits\n2. Enter wrong digits: 9999\n3. Click Verify',expected:"Error: 'Incorrect details. Please try again'"},
+  {id:'TC_LGN_024',type:'Negative',module:'Social Auth',subModule:'Last 4 Digits of Phone',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for last 4 digits\n2. Leave field blank\n3. Click Verify',expected:"Validation: 'This field is required'"},
+  {id:'TC_LGN_025',type:'Positive',module:'Social Auth',subModule:'Date of Birth (DDMM)',priority:'High',preConditions:'MFA screen displayed; registered DOB: 15 March (DD=15, MM=03)',steps:'1. MFA prompts for DOB in DDMM format\n2. Enter: 1503\n3. Click Verify',expected:'MFA passed; user redirected to Dashboard'},
+  {id:'TC_LGN_026',type:'Negative',module:'Social Auth',subModule:'Date of Birth (DDMM)',priority:'High',preConditions:'MFA screen displayed; registered DOB: 15 March',steps:'1. MFA prompts for DOB in DDMM\n2. Enter wrong value: 2005\n3. Click Verify',expected:"Error: 'Incorrect details. Please try again'"},
+  {id:'TC_LGN_027',type:'Negative',module:'Social Auth',subModule:'Date of Birth (DDMM)',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for DOB in DDMM\n2. Enter invalid date: 3213\n3. Click Verify',expected:"Validation: 'Please enter a valid date in DDMM format'"},
+  {id:'TC_LGN_028',type:'Negative',module:'Social Auth',subModule:'Date of Birth (DDMM)',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for DOB in DDMM\n2. Enter in wrong format: 15/03\n3. Click Verify',expected:"Validation: 'Enter date as DDMM without separators'"},
+  {id:'TC_LGN_029',type:'Negative',module:'Social Auth',subModule:'Date of Birth (DDMM)',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for DOB in DDMM\n2. Enter only 3 digits: 150\n3. Click Verify',expected:"Validation: 'Please enter exactly 4 digits in DDMM format'"},
+  {id:'TC_LGN_030',type:'Positive',module:'Social Auth',subModule:'Passport Number',priority:'High',preConditions:'MFA screen displayed; registered passport: A1234567',steps:'1. MFA prompts for passport number\n2. Enter: A1234567\n3. Click Verify',expected:'MFA passed; user redirected to Dashboard'},
+  {id:'TC_LGN_031',type:'Negative',module:'Social Auth',subModule:'Passport Number',priority:'High',preConditions:'MFA screen displayed; registered passport: A1234567',steps:'1. MFA prompts for passport number\n2. Enter wrong number: B9999999\n3. Click Verify',expected:"Error: 'Incorrect details. Please try again'"},
+  {id:'TC_LGN_032',type:'Negative',module:'Social Auth',subModule:'Passport Number',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for passport number\n2. Enter special characters: A@#$567\n3. Click Verify',expected:"Validation: 'Passport number must be alphanumeric only'"},
+  {id:'TC_LGN_033',type:'Negative',module:'Social Auth',subModule:'Passport Number',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for passport number\n2. Leave field blank\n3. Click Verify',expected:"Validation: 'Passport number is required'"},
+  {id:'TC_LGN_034',type:'Negative',module:'Social Auth',subModule:'Passport Number',priority:'Low',preConditions:'MFA screen displayed',steps:'1. MFA prompts for passport number\n2. Enter lowercase: a1234567\n3. Click Verify',expected:'System accepts or converts to uppercase; no silent failure'},
+  {id:'TC_LGN_035',type:'Positive',module:'Social Auth',subModule:'SSN',priority:'High',preConditions:'MFA screen displayed; registered SSN: 123-45-6789',steps:'1. MFA prompts for SSN\n2. Enter: 123-45-6789\n3. Click Verify',expected:'MFA passed; user redirected to Dashboard'},
+  {id:'TC_LGN_036',type:'Positive',module:'Social Auth',subModule:'SSN',priority:'Medium',preConditions:'MFA screen displayed; registered SSN: 123-45-6789',steps:'1. MFA prompts for SSN\n2. Enter without dashes: 123456789\n3. Click Verify',expected:'System accepts both formats; MFA passed'},
+  {id:'TC_LGN_037',type:'Negative',module:'Social Auth',subModule:'SSN',priority:'High',preConditions:'MFA screen displayed; registered SSN: 123-45-6789',steps:'1. MFA prompts for SSN\n2. Enter wrong SSN: 999-99-9999\n3. Click Verify',expected:"Error: 'Incorrect details. Please try again'"},
+  {id:'TC_LGN_038',type:'Negative',module:'Social Auth',subModule:'SSN',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for SSN\n2. Enter invalid SSN: 000-00-0000\n3. Click Verify',expected:"Validation: 'SSN 000-00-0000 is not a valid SSN'"},
+  {id:'TC_LGN_039',type:'Negative',module:'Social Auth',subModule:'SSN',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for SSN\n2. Enter partial SSN: 123-45\n3. Click Verify',expected:"Validation: 'Please enter a complete 9-digit SSN'"},
+  {id:'TC_LGN_040',type:'Negative',module:'Social Auth',subModule:'SSN',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. MFA prompts for SSN\n2. Enter alphabets: ABC-DE-FGHI\n3. Click Verify',expected:'Validation: field accepts digits and dashes only; alphabets blocked'},
+  {id:'TC_LGN_041',type:'Negative',module:'Social Auth',subModule:'General – Max Attempts',priority:'High',preConditions:'MFA screen displayed',steps:'1. Enter wrong MFA answer 3 consecutive times\n2. Click Verify each time',expected:"Session terminated after 3 failed attempts; message: 'Too many failed attempts'"},
+  {id:'TC_LGN_042',type:'Negative',module:'Social Auth',subModule:'General – Session Timeout',priority:'Medium',preConditions:'MFA screen displayed',steps:'1. Leave MFA screen idle beyond session timeout (10 mins)\n2. Enter valid MFA answer\n3. Click Verify',expected:"Error: 'Session expired. Please log in again'; user redirected to login page"},
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'qa_tracker_html_v1';
+let state = { versions: [], activeVer: 0, activeModule: 'All', sheetUrl: '' };
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      state = { ...state, ...JSON.parse(saved) };
+    } else {
+      state.versions = [makeV0()];
+    }
+  } catch(e) {
+    state.versions = [makeV0()];
+  }
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function makeV0(cases) {
+  return { label: 'V0', name: 'Master Test Cases', date: null, isBase: true, cases: cases || V0_DEFAULT };
+}
+
+// ─── Computed ─────────────────────────────────────────────────────────────────
+function currentVersion() { return state.versions[state.activeVer] || null; }
+
+function currentCases() { return (currentVersion() || {}).cases || []; }
+
+function displayCases() {
+  const cases = currentCases();
+  return state.activeModule === 'All' ? cases : cases.filter(c => c.module === state.activeModule);
+}
+
+function getModules(cases) {
+  return ['All', ...new Set(cases.map(c => c.module))];
+}
+
+function statsFor(cases) {
+  const pass    = cases.filter(c => c.status === 'Pass').length;
+  const fail    = cases.filter(c => c.status === 'Fail').length;
+  const blocked = cases.filter(c => c.status === 'Blocked').length;
+  const pending = cases.filter(c => !c.status || c.status === 'Pending').length;
+  return { pass, fail, blocked, pending, total: cases.length };
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function runVersions() { return state.versions.filter(v => !v.isBase); }
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  renderVersionRail();
+  renderModuleBar();
+  renderContent();
+}
+
+function renderVersionRail() {
+  const rail = document.getElementById('versionRail');
+  let html = '';
+
+  state.versions.forEach((v, i) => {
+    const isActive = i === state.activeVer;
+    let badge = '';
+    if (v.isBase) {
+      badge = `<span class="version-badge base">base</span>`;
+    } else {
+      const s = statsFor(v.cases);
+      const pct = s.total ? Math.round(s.pass / s.total * 100) : 0;
+      const good = s.pending === 0 && s.total > 0;
+      badge = `<span class="version-badge pct${good?' good':''}">${pct}%</span>`;
+    }
+    const sub = v.isBase
+      ? `${v.cases.length} cases &middot; read-only`
+      : `${fmtDate(v.date)} &middot; ${v.name}`;
+
+    html += `
+      <div class="version-tab${isActive?' active':''}" onclick="selectVersion(${i})">
+        <div class="version-tab-top">
+          <span class="version-label">${v.label}</span>
+          ${badge}
+        </div>
+        <div class="version-sub">${sub}</div>
+      </div>`;
+  });
+
+  html += `<div class="version-add" onclick="openNewRunModal()" title="New Run">+</div>`;
+  rail.innerHTML = html;
+}
+
+function renderModuleBar() {
+  const bar = document.getElementById('moduleBar');
+  const ver = currentVersion();
+  if (!ver) { bar.innerHTML = ''; return; }
+
+  const mods = getModules(ver.cases);
+  bar.innerHTML = mods.map(m => {
+    const count = m === 'All' ? ver.cases.length : ver.cases.filter(c => c.module === m).length;
+    return `
+      <div class="module-tab${m === state.activeModule?' active':''}" onclick="selectModule('${m}')">
+        ${m}
+        <span class="module-count">${count}</span>
+      </div>`;
+  }).join('');
+}
+
+function renderContent() {
+  const el = document.getElementById('mainContent');
+  const ver = currentVersion();
+
+  if (!ver) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-title">No test runs yet</div>
+        <div class="empty-sub">Click "+ New Run" to log your first test execution.</div>
+      </div>`;
+    return;
+  }
+
+  const isBase = ver.isBase;
+  const shown  = displayCases();
+  const s      = statsFor(shown);
+  const total  = s.total || 1;
+  const pPass  = Math.round(s.pass    / total * 100);
+  const pFail  = Math.round(s.fail    / total * 100);
+  const pPend  = Math.round(s.pending / total * 100);
+  const pBlock = Math.round(s.blocked / total * 100);
+
+  let html = `
+    <div class="version-header">
+      <div class="version-title-group">
+        <span class="version-title">${ver.label}</span>
+        <span class="version-desc">
+          ${isBase
+            ? 'Master test cases — canonical reference'
+            : `${ver.name} &middot; ${fmtDate(ver.date)}`}
+        </span>
+      </div>
+      <div class="version-meta">
+        <span class="meta-pill">${shown.length} case${shown.length!==1?'s':''}</span>
+        ${isBase ? `<span class="meta-pill">Read-only</span>` : ''}
+      </div>
+    </div>`;
+
+  if (isBase) {
+    html += `
+      <div class="v0-banner">
+        <div class="v0-banner-text">
+          <strong>V0</strong> is the canonical library — read-only. Each new run (V1, V2 …) inherits a fresh copy of these cases.
+          New sheets added to your Google Spreadsheet automatically become V1, V2, V3 … with their tab name as the run name and the sync date attached.
+        </div>
+        <button class="btn btn-ghost" onclick="openSyncModal()">↻ Sync from Sheet</button>
+      </div>`;
+  }
+
+  if (!isBase) {
+    html += `
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-label">Total</div>
+          <div class="stat-value">${s.total}</div>
+          <div class="stat-sub">test cases</div>
+        </div>
+        <div class="stat-card pass">
+          <div class="stat-label">Pass</div>
+          <div class="stat-value">${s.pass}</div>
+          <div class="stat-sub">${pPass}% of total</div>
+        </div>
+        <div class="stat-card fail">
+          <div class="stat-label">Fail</div>
+          <div class="stat-value">${s.fail}</div>
+          <div class="stat-sub">${pFail}% of total</div>
+        </div>
+        <div class="stat-card other">
+          <div class="stat-label">Pending / Blocked</div>
+          <div class="stat-value">${s.pending + s.blocked}</div>
+          <div class="stat-sub">${pPend + pBlock}% remaining</div>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="pb-pass"    style="width:${pPass}%"></div>
+          <div class="pb-fail"    style="width:${pFail}%"></div>
+          <div class="pb-pending" style="width:${pPend}%"></div>
+          <div class="pb-blocked" style="width:${pBlock}%"></div>
+        </div>
+        <div class="progress-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:#2D6A12"></span>Pass</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#9E2424"></span>Fail</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#C8941A"></span>Pending</span>
+          <span class="legend-item"><span class="legend-dot" style="background:#1A5090"></span>Blocked</span>
+        </div>
+      </div>`;
+  }
+
+  // Table
+  const pillsHtml = !isBase ? `
+    <div class="status-pills">
+      ${['Pass','Fail','Pending','Blocked'].map(s2 => {
+        const cnt = shown.filter(c => (c.status||'Pending') === s2).length;
+        return `<span class="status-pill ${s2.toLowerCase()}">${s2} ${cnt}</span>`;
+      }).join('')}
+    </div>` : '';
+
+  html += `
+    <div class="table-card">
+      <div class="table-card-header">
+        <span class="table-card-title">${state.activeModule === 'All' ? 'All Modules' : state.activeModule}</span>
+        ${pillsHtml}
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>TC ID</th>
+              <th>Type</th>
+              <th>Sub-Module</th>
+              <th>Priority</th>
+              <th>Pre-Conditions</th>
+              <th>Steps</th>
+              <th>Expected Result</th>
+              ${!isBase ? '<th>Status</th><th>Actual Result</th>' : ''}
+            </tr>
+          </thead>
+          <tbody>
+            ${shown.map((c, idx) => renderRow(c, idx, isBase)).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  el.innerHTML = html;
+}
+
+function renderRow(c, idx, readOnly) {
+  const status    = c.status || 'Pending';
+  const stepLines = c.steps.split('\n');
+  const preview   = stepLines.slice(0,2).join('\n') + (stepLines.length > 2 ? '\n…' : '');
+  const expText   = c.expected.length > 90 ? c.expected.slice(0,90) + '…' : c.expected;
+  const verIdx    = state.activeVer;
+  const mod       = state.activeModule;
+
+  const actionCells = readOnly ? '' : `
+    <td>
+      <select class="status-select ${status.toLowerCase()}"
+        onchange="updateStatus(${verIdx}, '${c.id}', this.value); this.className='status-select '+this.value.toLowerCase()">
+        <option${status==='Pending'?' selected':''}>Pending</option>
+        <option${status==='Pass'?' selected':''}>Pass</option>
+        <option${status==='Fail'?' selected':''}>Fail</option>
+        <option${status==='Blocked'?' selected':''}>Blocked</option>
+      </select>
+    </td>
+    <td>
+      <input class="actual-input" placeholder="—"
+        value="${(c.actualResult||'').replace(/"/g,'&quot;')}"
+        onblur="updateActual(${verIdx}, '${c.id}', this.value)" />
+    </td>`;
+
+  return `
+    <tr>
+      <td><span class="tc-id">${c.id}</span></td>
+      <td><span class="type-badge ${c.type.toLowerCase()}">${c.type}</span></td>
+      <td><span class="submodule-text">${c.subModule}</span></td>
+      <td>
+        <div class="priority-cell">
+          <span class="priority-dot dot-${(c.priority||'medium').toLowerCase()}"></span>
+          ${c.priority}
+        </div>
+      </td>
+      <td><div class="cell-text" style="max-width:160px">${c.preConditions||'—'}</div></td>
+      <td><div class="cell-text">${preview}</div></td>
+      <td><div class="cell-text">${expText}</div></td>
+      ${actionCells}
+    </tr>`;
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+function selectVersion(i) {
+  state.activeVer    = i;
+  state.activeModule = 'All';
+  render();
+}
+
+function selectModule(m) {
+  state.activeModule = m;
+  renderModuleBar();
+  renderContent();
+}
+
+function updateStatus(verIdx, tcId, status) {
+  const ver = state.versions[verIdx];
+  if (!ver) return;
+  const tc = ver.cases.find(c => c.id === tcId);
+  if (tc) { tc.status = status; }
+  saveState();
+  renderVersionRail(); // update pct badge
+}
+
+function updateActual(verIdx, tcId, val) {
+  const ver = state.versions[verIdx];
+  if (!ver) return;
+  const tc = ver.cases.find(c => c.id === tcId);
+  if (tc) { tc.actualResult = val; }
+  saveState();
+}
+
+// ─── New Run Modal ────────────────────────────────────────────────────────────
+function openNewRunModal() {
+  const nextNum = runVersions().length + 1;
+  document.getElementById('newRunVersionLabel').textContent = `→ V${nextNum}`;
+  document.getElementById('createRunBtn').textContent = `Create V${nextNum}`;
+  document.getElementById('caseCount').textContent = state.versions[0]?.cases?.length || V0_DEFAULT.length;
+  document.getElementById('inputRunName').value = '';
+  document.getElementById('inputRunDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('newRunModal').classList.remove('hidden');
+}
+
+function createRun() {
+  const name = document.getElementById('inputRunName').value.trim() || `Run ${runVersions().length + 1}`;
+  const date = document.getElementById('inputRunDate').value || new Date().toISOString().slice(0,10);
+  const runNum = runVersions().length + 1;
+  const baseCases = (state.versions[0]?.cases || V0_DEFAULT);
+
+  const newVersion = {
+    label: `V${runNum}`,
+    name,
+    date,
+    isBase: false,
+    cases: baseCases.map(c => ({ ...c, status: 'Pending', actualResult: '' })),
+  };
+
+  state.versions.push(newVersion);
+  state.activeVer    = state.versions.length - 1;
+  state.activeModule = 'All';
+  saveState();
+  closeModal('newRunModal');
+  render();
+}
+
+// ─── Sync Modal ───────────────────────────────────────────────────────────────
+function openSyncModal() {
+  document.getElementById('inputSheetUrl').value = state.sheetUrl || '';
+  document.getElementById('syncModal').classList.remove('hidden');
+}
+
+async function saveAndSync() {
+  const url = document.getElementById('inputSheetUrl').value.trim();
+  if (!url) { alert('Please paste your Apps Script Web App URL first.'); return; }
+  state.sheetUrl = url;
+  saveState();
+  closeModal('syncModal');
+  await syncFromSheet();
+}
+
+async function syncFromSheet() {
+  if (!state.sheetUrl) { openSyncModal(); return; }
+  showSyncBadge('syncing', '↻ syncing…');
+  try {
+    const res = await fetch(state.sheetUrl);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    // data is { "SheetName": [ rowObjects... ], ... }
+    // V0 = first sheet with "TC ID" column
+    // Additional sheets beyond the first = V1, V2, ... appended
+    const sheetNames = Object.keys(data);
+
+    if (sheetNames.length === 0) throw new Error('No sheets found in response');
+
+    // Normalise a row object to our case format
+    function normaliseCase(row) {
+      return {
+        id:            row['TC ID']          || row['id']             || '',
+        type:          row['Type']           || row['type']           || 'Positive',
+        module:        row['Module']         || row['module']         || 'General',
+        subModule:     row['Sub-Module']     || row['subModule']      || '',
+        priority:      row['Priority']       || row['priority']       || 'Medium',
+        preConditions: row['Pre-conditions'] || row['preConditions']  || '',
+        steps:         row['Test Steps']     || row['steps']          || '',
+        expected:      row['Expected Result']|| row['expected']       || '',
+        status:        row['Status']         || row['status']         || 'Pending',
+        actualResult:  row['Actual Result']  || row['actualResult']   || '',
+      };
+    }
+
+    // First sheet → V0
+    const firstSheet = sheetNames[0];
+    const v0Cases = (data[firstSheet] || []).map(normaliseCase).filter(c => c.id);
+    state.versions[0] = makeV0(v0Cases);
+
+    // Remaining sheets → new versioned runs (only add if not already present by label)
+    const today = new Date().toISOString().slice(0,10);
+    const existingLabels = new Set(state.versions.map(v => v.name));
+
+    sheetNames.slice(1).forEach(sheetName => {
+      if (existingLabels.has(sheetName)) return; // already imported
+      const runNum  = runVersions().length + 1;
+      const cases   = (data[sheetName] || []).map(normaliseCase).filter(c => c.id);
+      if (cases.length === 0) return;
+      state.versions.push({
+        label: `V${runNum}`,
+        name:  sheetName,
+        date:  today,
+        isBase: false,
+        cases,
+      });
+    });
+
+    saveState();
+    render();
+    showSyncBadge('ok', '✓ synced');
+  } catch(e) {
+    console.error('Sync error:', e);
+    showSyncBadge('err', '✕ sync failed');
+  }
+}
+
+function showSyncBadge(type, text) {
+  const el = document.getElementById('syncBadge');
+  el.textContent = text;
+  el.className = `sync-badge ${type}`;
+  el.style.display = 'inline-block';
+  if (type !== 'syncing') {
+    setTimeout(() => { el.style.display = 'none'; }, 3500);
+  }
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadState();
+render();
+</script>
+</body>
+</html>
